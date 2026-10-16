@@ -1,0 +1,38 @@
+{
+  "unidade_1": {
+    "id": "unidade_1",
+    "name": "Unidade 1",
+    "label": "Unidade 1",
+    "country": "Não informado",
+    "plant": "Unidade 1",
+    "flag": "◇",
+    "image": ""
+  },
+  "unidade_2": {
+    "id": "unidade_2",
+    "name": "Unidade 2",
+    "label": "Unidade 2",
+    "country": "Não informado",
+    "plant": "Unidade 2",
+    "flag": "◇",
+    "image": ""
+  },
+  "unidade_3": {
+    "id": "unidade_3",
+    "name": "Unidade 3",
+    "label": "Unidade 3",
+    "country": "Não informado",
+    "plant": "Unidade 3",
+    "flag": "◇",
+    "image": ""
+  },
+  "unidade_4": {
+    "id": "unidade_4",
+    "name": "Unidade 4",
+    "label": "Unidade 4",
+    "country": "Não informado",
+    "plant": "Unidade 4",
+    "flag": "◇",
+    "image": ""
+  }
+}

@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="pt-BR" style="--sidebar-width: 380px;"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<meta content="no-referrer" name="referrer">
+<meta content="@@CSP@@" http-equiv="Content-Security-Policy">
+<title>Horse Motores · Mapa em foco</title>
+<style id="appStyles">@@APP_CSS@@</style>
+<meta name="description" content="Mapa interativo de plantas, operações e equipamentos da logística."></head>
+<body class="horse-body">
+<section id="loginPanel" class="private-login" hidden><form id="loginForm"><span class="private-badge">HORSE MOTORES · ACESSO PRIVADO</span><h1>Controle Industrial</h1><p>Entre na sua conta para acessar equipamentos e operações.</p><label for="loginUsername">Usuário</label><input id="loginUsername" name="username" autocomplete="username" required maxlength="100"><label for="loginPassword">Senha</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" required maxlength="256"><button id="loginButton" type="submit">Entrar</button><p id="loginStatus" role="alert"></p></form></section>
+<div class="map-ui-shell horse-theme" hidden>
+
+<header aria-label="Navegação principal" class="overview-shellbar"><div class="focus-brand"><span class="map-project-name">HORSE MOTORES</span><div class="focus-title"><h1>Mapa em foco</h1><p>Controle de equipamentos logísticos</p></div></div><aside aria-label="Busca de equipamentos" class="operations-sidebar" id="operationsSidebar"><div class="overview-search-field"><button aria-label="Pesquisar operações e equipamentos" class="overview-icon" id="overviewSearch" title="Pesquisar operações e equipamentos" type="button"><svg aria-hidden="true" viewbox="0 0 24 24"><circle cx="10" cy="10" r="6"></circle><path d="m15 15 5 5"></path></svg></button><label for="operationSearch">Buscar equipamento</label><input aria-label="Buscar operações e equipamentos" id="operationSearch" placeholder="Buscar equipamento" type="search"></div></aside><div class="overview-shell-actions"><details class="session-menu"><summary><span id="sessionUser">Conta</span><span aria-hidden="true">⌄</span></summary><div class="menu-popover"><button aria-label="Visão geral de operações" class="overview-icon" id="overviewHome" title="Visão geral de operações" type="button"><svg aria-hidden="true" viewbox="0 0 24 24"><path d="M3 11 12 3l9 8M5 10v10h5v-6h4v6h5V10"></path></svg></button><button class="map-ui-save-command" id="exportHtml" title="Confirma o salvamento das alterações no servidor privado." type="button">Salvar no servidor</button><button id="backupJson" type="button" class="secondary">Backup privado</button><button id="logoutButton" type="button" class="secondary">Sair</button></div></details></div></header>
+<div class="app with-side-navigation"><nav class="focus-navigation-rail" aria-label="Áreas do painel"><div class="navigation-rail-primary"><button class="navigation-rail-item active" id="navigateMap" type="button" aria-controls="contextNavigationPanel" aria-expanded="true" aria-current="page"><svg aria-hidden="true" focusable="false" class="focus-ui-icon"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+  <line x1="8" y1="2" x2="8" y2="18" />
+  <line x1="16" y1="6" x2="16" y2="22" />
+</svg>
+<span>Mapa</span></button><button class="equipment-list-tab navigation-rail-item" id="openEquipmentList" type="button" aria-controls="focusEquipmentDrawer" aria-expanded="false"><svg aria-hidden="true" focusable="false" class="focus-ui-icon"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+  <line x1="8" y1="21" x2="16" y2="21" />
+  <line x1="12" y1="17" x2="12" y2="21" />
+</svg>
+
+<span>Equipamentos</span></button><button class="navigation-rail-item" id="navigateOperations" type="button" aria-controls="contextNavigationPanel" aria-expanded="false"><svg aria-hidden="true" focusable="false" class="focus-ui-icon"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <polygon points="12 2 2 7 12 12 22 7 12 2" />
+  <polyline points="2 17 12 22 22 17" />
+  <polyline points="2 12 12 17 22 12" />
+</svg>
+<span>Operações</span></button></div><button aria-label="Ajuda do painel" class="navigation-rail-item navigation-help" id="overviewHelp" title="Ajuda do painel" type="button"><svg aria-hidden="true" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 8.5a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4M12 16h.01"></path></svg><span>Ajuda</span></button></nav><button id="contextPanelBackdrop" class="context-panel-backdrop" type="button" aria-label="Fechar painel lateral" tabindex="-1"></button><aside class="focus-context-panel" id="contextNavigationPanel" aria-labelledby="contextNavigationTitle"><header><h2 id="contextNavigationTitle">Explorar planta</h2><button id="closeEquipmentList" type="button" aria-label="Recolher painel lateral">Recolher</button></header><div class="floorplan-picker">
+<label for="countrySwitch">Planta</label>
+<select aria-label="Selecionar mapa ativo" id="countrySwitch"><option value="unidade_1">Unidade 1</option><option value="unidade_2">Unidade 2</option><option value="unidade_3">Unidade 3</option><option value="unidade_4">Unidade 4</option></select>
+</div><div class="context-panel-content"><section id="contextOperationSection"><label for="contextOperationSearch">Encontrar operação</label><input id="contextOperationSearch" type="search" placeholder="Encontrar operação" autocomplete="off"><p class="context-navigation-help">Operações são filtros opcionais do mapa.</p><div class="context-operation-list" id="contextOperationList"></div><div id="contextOperationsManage" hidden><button class="tool-button" id="manageOperations" type="button">Gerenciar operações</button></div></section><aside class="focus-equipment-drawer" id="focusEquipmentDrawer" aria-label="Lista de equipamentos" hidden><div class="focus-equipment-list" id="focusEquipmentList"></div></aside></div><div class="context-panel-filters"><details class="advanced-filters"><summary>Filtros <span aria-hidden="true">⌄</span></summary><div class="filter-popover"><div class="field deployment-field"><label for="deploymentFilter">Classificação</label><select id="deploymentFilter"><option value="">Todas · AS IS e TO DO</option><option value="TO DO">TO DO · Novo / planejado</option><option value="AS IS">AS IS · Já instalado</option></select></div><div class="field device-type-filter"><label for="deviceTypeFilter">Tipo de equipamento</label><select id="deviceTypeFilter"><option value="">Todos os equipamentos</option><option value="Printer">Impressora</option><option value="Reader">Leitor</option><option value="Desktop">Desktop</option><option value="Laptop">Notebook</option><option value="Mobile Tablet">Tablet</option><option value="EloTouch">EloTouch</option><option value="Collector">Coletor</option><option value="LTS">LTS</option><option value="Other">Outro</option></select></div><div class="field operation-filter"><label for="operationFilter">Operação (opcional)</label><select id="operationFilter"><option value="">Todas as operações</option></select></div><button class="secondary" id="clearOperationFilters" type="button">Limpar filtros</button>
+<div class="industrial-area-filter">
+<span class="industrial-area-filter-title">Área industrial</span>
+<div aria-label="Filtro por área industrial" class="industrial-area-filter-list" id="industrialAreaFilters" role="group"><button class="industrial-area-filter-button all-industrial-areas active" type="button" data-industrial-area-filter="" aria-pressed="true" title="Mostrar todas as áreas"><i aria-hidden="true"></i><span>Todas</span></button><button class="industrial-area-filter-button" type="button" data-industrial-area-filter="assembly" aria-pressed="false" title="Filtrar por Montagem" style="--area-color:#15803d"><i aria-hidden="true"></i><span>Montagem</span></button><button class="industrial-area-filter-button" type="button" data-industrial-area-filter="injection" aria-pressed="false" title="Filtrar por Injeção" style="--area-color:#dc2626"><i aria-hidden="true"></i><span>Injeção</span></button><button class="industrial-area-filter-button" type="button" data-industrial-area-filter="logistics" aria-pressed="false" title="Filtrar por Logística" style="--area-color:#0891b2"><i aria-hidden="true"></i><span>Logística</span></button><button class="industrial-area-filter-button" type="button" data-industrial-area-filter="machining" aria-pressed="false" title="Filtrar por Usinagem" style="--area-color:#2563eb"><i aria-hidden="true"></i><span>Usinagem</span></button></div>
+</div></div></details></div></aside><section class="equipment-summary-card" id="equipmentSummary" aria-labelledby="equipmentSummaryName" hidden><div class="equipment-summary-top"><span>Equipamento</span><button id="summaryCloseEquipment" type="button" aria-label="Fechar consulta do equipamento"><svg aria-hidden="true" focusable="false" class="focus-ui-icon"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <line x1="18" y1="6" x2="6" y2="18" />
+  <line x1="6" y1="6" x2="18" y2="18" />
+</svg>
+</button></div><h2 id="equipmentSummaryName"></h2><p class="equipment-summary-code" id="equipmentSummaryCode"></p><span class="equipment-summary-status" id="equipmentSummaryStatus"></span><dl><div><dt><svg aria-hidden="true" focusable="false" class="focus-ui-icon"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+  <line x1="8" y1="21" x2="16" y2="21" />
+  <line x1="12" y1="17" x2="12" y2="21" />
+</svg>
+Categoria</dt><dd id="equipmentSummaryType"></dd></div><div><dt><svg aria-hidden="true" focusable="false" class="focus-ui-icon"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+  <circle cx="12" cy="10" r="3" />
+</svg>
+Operações vinculadas</dt><dd id="equipmentSummaryOperation"></dd></div></dl><div class="equipment-summary-actions"><button class="secondary" id="summaryLocateEquipment" type="button"><svg aria-hidden="true" focusable="false" class="focus-ui-icon"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <circle cx="12" cy="12" r="10" />
+  <line x1="22" y1="12" x2="18" y2="12" />
+  <line x1="6" y1="12" x2="2" y2="12" />
+  <line x1="12" y1="6" x2="12" y2="2" />
+  <line x1="12" y1="22" x2="12" y2="18" />
+</svg>
+Localizar</button><button id="summaryEditEquipment" type="button"><svg aria-hidden="true" focusable="false" class="focus-ui-icon"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  xmlns="http://www.w3.org/2000/svg"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+</svg>
+Editar equipamento</button></div></section>
+<main class="workspace">
+<div class="topbar map-ui-screen-header">
+<div class="topbar-main">
+<div class="title">
+<h1>Mapa de equipamentos</h1>
+<p id="overviewMapContext">Clique em um equipamento ou use a busca para abrir seu cadastro</p>
+</div>
+</div>
+</div>
+<nav aria-label="Ações do mapa" class="workspace-menu">
+<h2>Funções</h2>
+<button id="menuAddOperation" type="button">+ Operação</button>
+<button id="menuAddEquipment" type="button">+ Equipamento</button>
+<button id="menuAddCable" type="button">+ Cabo</button>
+<button id="menuFitMap" type="button">Ajustar mapa</button>
+<button id="menuToggleDevices" type="button">Equipamentos</button>
+<button id="menuToggleCables" type="button">Cabos</button>
+</nav>
+<section class="map-shell"><div class="focus-map-toolbar" aria-label="Ações rápidas do mapa"><div class="focus-map-context"><div class="map-status">
+<span><strong id="mapOperationCount">0</strong> operações</span>
+<span><strong id="mapPointCount">0</strong> equipamentos</span>
+<span class="hidden"><strong id="mapCableCount">0</strong> cabos</span>
+</div><div class="private-sync"><span id="serverSaveStatus" role="status" aria-live="polite">Conectando…</span><button id="reauthButton" type="button" hidden>Entrar novamente</button><span id="conflictActions" hidden><button id="reloadServer" type="button">Carregar versão do servidor</button></span></div><div class="operation-context-filter" id="operationContextFilter" hidden><span id="operationContextFilterName"></span><button id="clearContextOperationFilter" type="button" aria-label="Remover filtro de operação">Ver todos</button></div></div><div class="focus-map-actions"><button id="createEquipmentPrimary" type="button" aria-pressed="false">Novo equipamento</button><details class="focus-options"><summary>Opções</summary><div class="focus-options-content"><details class="map-tool-menu"><summary>Ferramentas <span aria-hidden="true">⌄</span></summary><div aria-label="Ferramentas do mapa" class="map-tools" role="toolbar">
+<button aria-label="Recolher ferramentas" class="tool-button tool-toggle" id="toggleMapTools" title="Recolher ferramentas" type="button">‹</button>
+<div class="map-tool-group map-tool-primary">
+<span class="tool-group-label">Adicionar</span>
+<button aria-pressed="true" class="tool-button active" id="addPointHint" type="button">+ Operação</button>
+<button aria-pressed="false" class="tool-button" id="addDeviceHint" type="button">+ Equipamento</button>
+</div>
+<div aria-hidden="true" class="map-tool-divider"></div>
+<div class="map-tool-group">
+<span class="tool-group-label">Fixação</span>
+<button aria-pressed="false" class="tool-button" id="anchorOperations" title="Impedir a movimentação de todas as operações" type="button">Ancorar operações</button>
+<button aria-pressed="false" class="tool-button" id="anchorMap" title="Impedir o arraste manual do mapa" type="button">Ancorar mapa</button>
+</div>
+<div aria-hidden="true" class="map-tool-divider"></div>
+<div class="map-tool-group map-tool-zoom">
+<span class="tool-group-label">Visualização</span>
+<button class="tool-button" id="fitMap" type="button">Ajustar</button>
+<button class="tool-button" id="fullscreenMap" title="Abrir mapa em tela cheia" type="button">Tela cheia</button>
+</div>
+<div aria-hidden="true" class="map-tool-divider"></div>
+<div class="map-tool-group">
+<span class="tool-group-label">Camadas</span>
+<button aria-pressed="true" class="tool-button active" id="toggleEquipmentLayer" type="button">Equipamentos</button>
+<button aria-pressed="false" class="tool-button" id="toggleOperationLayer" type="button">Operações</button><button aria-pressed="true" class="tool-button active" id="toggleLabelLayer" type="button">Rótulos</button>
+</div>
+<button aria-hidden="true" class="tool-button hidden" id="addCableMode" tabindex="-1" type="button">Cabo</button>
+<button aria-hidden="true" class="tool-button hidden" id="toggleCableLayer" tabindex="-1" type="button">Cabos</button>
+</div></details><details class="inventory-summary"><summary>Inventário <span aria-hidden="true">⌄</span></summary><section aria-label="Indicadores do inventário" class="overview-overview">
+<article class="overview-overview-card"><div><h3>Equipamentos</h3><p>Todas as plantas</p></div><strong id="overviewTotal">0</strong></article>
+<article class="overview-overview-card"><div><h3>Operações</h3><p id="overviewPlantLabel">Planta selecionada</p></div><strong id="overviewOperations">0</strong></article>
+<article class="overview-overview-card"><div><h3>Validação pendente</h3><p>Todas as plantas</p></div><strong class="overview-positive" id="overviewPending">0</strong></article>
+<article class="overview-overview-card"><div><h3>Plantas</h3><p>Unidades cadastradas</p></div><strong id="overviewPlants">0</strong></article>
+</section></details></div></details></div></div><p id="mapActionHint" class="map-action-hint" role="status" hidden></p><div aria-label="Mapa interativo da planta" class="map-stage" id="mapStage" role="tabpanel" tabindex="0">
+
+<div class="map-holder pannable" id="mapHolder">
+<div class="hidden" id="emptyMap">
+<strong>Nenhum mapa carregado</strong>
+<p>Use “Importar planta” para adicionar a imagem desta unidade.</p>
+<button id="chooseMap" type="button">Importar planta</button>
+<input id="mapUpload" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" aria-label="Imagem da planta">
+</div>
+<img alt="Planta industrial da unidade selecionada" class="" decoding="async" draggable="false" fetchpriority="high" id="mapImage">
+<svg aria-hidden="true" class="" id="cableLayer"></svg>
+</div>
+<div class="map-legend collapsed" id="mapLegend">
+<header>
+<h3>Legenda dos equipamentos</h3>
+<button class="legend-toggle" id="toggleLegend" type="button">Mostrar</button>
+</header>
+<div class="legend-body">
+<div class="legend-items operation-legend" id="operationLegend"></div>
+<div class="legend-items" id="equipmentLegend"></div>
+<div class="legend-items" id="cableLegend"></div>
+</div>
+</div>
+<div aria-label="Zoom do mapa" class="compact-map-controls" role="group"><button aria-label="Diminuir zoom" class="tool-button icon-button" id="zoomOut" title="Diminuir zoom" type="button">−</button><span aria-live="polite" class="zoom-readout" id="zoomLevel">115%</span><button aria-label="Aumentar zoom" class="tool-button icon-button" id="zoomIn" title="Aumentar zoom" type="button">+</button><button aria-label="Restaurar enquadramento do mapa" class="tool-button" id="zoomReset" title="Restaurar enquadramento do mapa" type="button"><svg aria-hidden="true" focusable="false" class="focus-ui-icon"
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+  <line x1="8" y1="2" x2="8" y2="18" />
+  <line x1="16" y1="6" x2="16" y2="22" />
+</svg>
+Planta atual</button><button hidden="" id="releaseMapMovement" title="Liberar mapa e operações com bloqueio temporário" type="button">Liberar movimento</button></div></div>
+</section>
+</main>
+<div class="resize-handle" id="resizeHandle" title="Arraste para ajustar a largura do painel"></div>
+<button aria-controls="sidebarInspector" aria-expanded="true" aria-label="Minimizar barra lateral" class="inspector-toggle hidden" id="toggleInspector" title="Minimizar barra lateral" type="button"></button>
+<aside aria-hidden="false" class="sidebar" id="sidebarInspector">
+<div class="side-header">
+<div class="side-header-top">
+<h2 id="panelTitle">Operações</h2>
+<button aria-label="Fechar cadastro e voltar ao mapa" class="inspector-back" id="sidebarHome" title="Fechar cadastro mantendo busca e filtros" type="button">Voltar ao mapa</button>
+<details class="side-action-menu"><summary aria-label="Ações do painel">⋯</summary><div class="side-header-actions">
+<button id="createOperation" title="Criar uma operação" type="button">+ Criar</button>
+<button class="hidden" id="editEquipment" type="button">Editar</button>
+<button class="secondary hidden" id="panelLockToggle" title="Fixar permanentemente a posição deste equipamento" type="button" disabled>Fixar</button>
+</div></details>
+</div>
+<p id="selectionHint">Selecione um equipamento no mapa ou pesquise pelo código, nome, IP ou série.</p>
+</div>
+<div class="kpi-grid" style="display:none">
+<div class="kpi"><strong id="kpiPoints">0</strong><span>points</span></div>
+<div class="kpi"><strong id="kpiCables">0</strong><span>cables</span></div>
+<div class="kpi"><strong id="kpiIssues">0</strong><span>issues</span></div>
+</div>
+<section aria-label="geral dashboard" class="dashboard-panel" id="inventoryDashboard" style="display:none"></section>
+<form class="editor hidden" id="editor"><div class="editor-fields"><p class="equipment-operation-context" id="equipmentOperationContext"></p><div class="field linked-operations-source">
+<label>Operações vinculadas</label>
+<button aria-controls="linkedOperationsDialog" aria-haspopup="dialog" aria-label="Gerenciar 1 operação vinculada" class="secondary linked-operations-trigger" id="openLinkedOperations" type="button">
+<span>Gerenciar vínculos</span>
+<span class="linked-operations-count" id="linkedOperationsCount">0</span>
+</button>
+</div>
+<div class="field">
+<label for="equipmentId">Código</label>
+<input id="equipmentId" placeholder="EX: PR-01" required="" type="text">
+</div>
+<div class="field">
+<label for="equipmentName">Nome</label>
+<input id="equipmentName" placeholder="Ex.: Equipamento da expedição" type="text">
+</div>
+<div class="field-row">
+
+<div class="field">
+<label for="equipmentCriticality">Criticidade</label>
+<select id="equipmentCriticality">
+<option value="Low">Baixa</option>
+<option value="Medium">Média</option>
+<option value="High">Alta</option>
+<option value="Critical">Crítica</option>
+</select>
+</div>
+</div>
+<div class="field-row">
+<div class="field">
+<label for="equipmentType">Categoria</label>
+<select id="equipmentType">
+<option value="Printer">Impressora</option>
+<option value="Reader">Leitor</option>
+<option value="Desktop">Desktop</option>
+<option value="Laptop">Notebook</option>
+<option value="Mobile Tablet">Tablet</option>
+<option value="EloTouch">EloTouch</option>
+<option value="Collector">Coletor</option>
+<option value="LTS">LTS</option>
+<option value="Other">Outro</option>
+</select>
+</div>
+<div class="field">
+<label for="equipmentStatus">Status</label>
+<select id="equipmentStatus">
+<option value="Online">Online</option>
+<option value="Offline">Offline</option>
+</select>
+</div>
+</div>
+<details class="equipment-section equipment-more"><summary>Mais detalhes</summary><div class="field deployment-field"><label for="equipmentDeploymentStage">Classificação do equipamento</label><select id="equipmentDeploymentStage"><option value="TO DO">TO DO · Novo / planejado</option><option value="AS IS">AS IS · Já instalado</option></select></div><details class="equipment-section" id="equipmentTechnical"><summary>Dados técnicos e localização</summary>
+<div class="notice" id="categoryHint">Recomendado: nome, usuário ou área, Wi-Fi, MAC, número de série ou IMEI, status do MDM e responsável.</div>
+<div class="field-row">
+<div class="field">
+<label for="equipmentCountry">País</label>
+<select id="equipmentCountry"><option value="Não informado">Não informado</option></select>
+</div>
+<div class="field">
+<label for="equipmentPlant">Planta</label>
+<input id="equipmentPlant" placeholder="EX: Unidade 1" type="text">
+</div>
+</div>
+<div class="field-row">
+<div class="field">
+<label for="equipmentArea">Área</label>
+<input id="equipmentArea" placeholder="Ex.: Planta 1 / Linha A" type="text">
+</div>
+<div class="field">
+<label for="equipmentLine">Linha de produção</label>
+<input id="equipmentLine" placeholder="Ex.: Linha A" type="text">
+</div>
+</div>
+<div class="field-row">
+<div class="field">
+<label for="equipmentStation">Estação</label>
+<input id="equipmentStation" placeholder="Ex.: Estação de embalagem 03" type="text">
+</div>
+<div class="field">
+<label for="equipmentIp">Endereço IP</label>
+<input id="equipmentIp" placeholder="EX: 192.0.2.20" type="text">
+</div>
+</div>
+<div class="field-row">
+<div class="field">
+<label for="equipmentModel">Modelo</label>
+<input id="equipmentModel" placeholder="EX: Stratix 5700" type="text">
+</div>
+<div class="field">
+<label for="equipmentSerial">Número de série</label>
+<input id="equipmentSerial" placeholder="EX: SN12345" type="text">
+</div>
+</div>
+<div class="field-row">
+<div class="field">
+<label for="equipmentMac">MAC</label>
+<input id="equipmentMac" placeholder="EX: 02:00:00:00:00:01" type="text">
+</div>
+<div class="field">
+<label for="equipmentVlan">VLAN</label>
+<input id="equipmentVlan" placeholder="EX: VLAN 120" type="text">
+</div>
+</div>
+<div class="field-row">
+<div class="field">
+<label for="equipmentHostname">Hostname</label>
+<input id="equipmentHostname" placeholder="EX: DEV-01" type="text">
+</div>
+<div class="field">
+<label for="equipmentVendor">Fabricante</label>
+<input id="equipmentVendor" placeholder="EX: Cisco / Rockwell" type="text">
+</div>
+</div>
+<div class="field-row">
+<div class="field">
+<label for="equipmentOwner">Responsável / equipe</label>
+<input id="equipmentOwner" placeholder="EX: Telecom L1" type="text">
+</div>
+<div class="field">
+<label for="equipmentTicket">Chamado</label>
+<input id="equipmentTicket" placeholder="EX: INC123456" type="text">
+</div>
+</div>
+<div class="field-row">
+<div class="field">
+<label for="equipmentRack">Rack / painel</label>
+<input id="equipmentRack" placeholder="EX: Rack-01" type="text">
+</div>
+<div class="field">
+<label for="equipmentPort">Porta</label>
+<input id="equipmentPort" placeholder="EX: SW1-05" type="text">
+</div>
+</div>
+</details>
+<details class="equipment-section" id="equipmentAppearance"><summary>Aparência e posição no mapa</summary>
+<div class="field-row">
+<div class="field">
+<label for="markerColor">Cor do marcador</label>
+<input id="markerColor" type="color" value="#ef4444">
+</div>
+<div class="field">
+<label for="markerShape">Formato do marcador</label>
+<select id="markerShape">
+<option value="pin">Pino</option>
+<option value="circle">Círculo</option>
+<option value="square">Quadrado</option>
+<option value="diamond">Losango</option>
+</select>
+</div>
+</div>
+<div class="field">
+<label for="markerLabelMode">Texto exibido no marcador</label>
+<select id="markerLabelMode">
+<option value="id">ID</option>
+<option value="name">Nome</option>
+<option value="both">ID + nome</option>
+</select>
+</div>
+<div class="field-row">
+<div class="field">
+<label for="markerSize">Tamanho do marcador (px)</label>
+<div class="range-field">
+<input id="markerSize" max="72" min="8" step="1" type="range" value="18">
+<input id="markerSizeValue" max="72" min="8" step="1" type="number" value="18">
+</div>
+</div>
+</div>
+<div class="field">
+<label for="markerPosition">Posição</label>
+<input id="markerPosition" readonly type="text">
+</div>
+</details>
+<div class="field">
+<label for="quickLtsTarget">Criar cabo deste equipamento para LTS</label>
+<div class="process-add">
+<select disabled id="quickLtsTarget"></select>
+<button class="secondary" disabled id="quickLtsCable" type="button">Conectar</button>
+</div>
+</div>
+<div class="field-row">
+<div class="field">
+<label for="quickCableType">Tipo de cabo</label>
+<select id="quickCableType">
+<option value="Ethernet">Ethernet</option>
+<option value="Fiber">Fiber</option>
+<option value="Power">Power</option>
+<option value="Control">Control</option>
+<option value="Coax">Coax</option>
+<option value="Other">Outro</option>
+</select>
+</div>
+<div class="field">
+<label for="quickCableWidth">Espessura do cabo</label>
+<select id="quickCableWidth">
+<option value="0.5">Ultra fine</option>
+<option value="1">Hairline</option>
+<option value="2">Thin</option>
+<option value="4">Medium</option>
+<option value="7">Thick</option>
+<option value="10">Very thick</option>
+</select>
+</div>
+</div>
+<div class="field">
+<label for="quickCableId">Cable ID</label>
+<input id="quickCableId" placeholder="Auto if empty" type="text">
+</div>
+<div class="field">
+<label for="equipmentInfo">Informações</label>
+<textarea id="equipmentInfo" placeholder="Observações de suporte e manutenção..."></textarea>
+</div>
+<div class="modal-section data-quality-section">
+<h3>Validação física</h3>
+<div class="field-row">
+<label class="checkbox-field"><input id="validationFound" type="checkbox"> Equipamento encontrado fisicamente</label>
+<label class="checkbox-field"><input id="validationHostname" type="checkbox"> Hostname verificado</label>
+</div>
+<div class="field-row">
+<label class="checkbox-field"><input id="validationIp" type="checkbox"> IP verificado</label>
+<label class="checkbox-field"><input id="validationMac" type="checkbox"> MAC verificado</label>
+</div>
+<div class="field-row">
+<label class="checkbox-field"><input id="validationSerial" type="checkbox"> Número de série verificado</label>
+<label class="checkbox-field"><input id="validationPort" type="checkbox"> Porta de rede verificada</label>
+</div>
+<div class="field-row">
+<label class="checkbox-field"><input id="validationPhoto" type="checkbox"> Foto anexada</label>
+<label class="checkbox-field"><input id="validationResponsible" type="checkbox"> Responsável validado</label>
+</div>
+<label class="checkbox-field"><input id="validationDeploymentReady" type="checkbox"> Pronto para implantação</label>
+<div class="field-row">
+<div class="field">
+<label for="validationStatus">Status da validação</label>
+<select id="validationStatus">
+<option value="Discovered">Identificado</option>
+<option value="Pending Validation">Validação pendente</option>
+<option value="Validated">Validado</option>
+<option value="Ready for Deployment">Pronto para implantação</option>
+<option value="In Deployment">Em implantação</option>
+<option value="Active">Ativo</option>
+<option value="Maintenance">Manutenção</option>
+<option value="Replaced">Substituído</option>
+<option value="Decommissioned">Desativado</option>
+</select>
+</div>
+<div class="field">
+<label for="lastValidationDate">Data da última validação</label>
+<input id="lastValidationDate" type="date">
+</div>
+</div>
+<div class="field">
+<label for="validatedBy">Validado por</label>
+<input id="validatedBy" placeholder="EX: local-user" type="text">
+</div>
+</div>
+<div class="field">
+<label for="equipmentLink">Link do equipamento</label>
+<div class="process-add">
+<input id="equipmentLink" readonly type="text">
+<button class="secondary" id="copyEquipmentLink" type="button">Copiar</button>
+</div>
+</div>
+<div class="field">
+<label for="photoUpload">Adicionar fotos</label>
+<div class="process-add">
+<input accept="image/png,image/jpeg,image/webp" class="hidden" id="photoUpload" multiple type="file">
+<button aria-controls="photoUpload" class="secondary" id="addPhoto" type="button">Adicionar imagens</button>
+</div>
+</div>
+<div aria-live="polite" class="notice hidden" id="photoStatus"></div>
+<div class="photos" id="photos"></div>
+</details><details class="equipment-section equipment-danger"><summary>Excluir equipamento</summary><p>Esta ação remove o equipamento do inventário.</p><button class="danger" id="deletePoint" type="button">Excluir equipamento</button></details></div><div class="editor-actions">
+<div aria-live="polite" role="status" class="notice hidden" id="equipmentFormStatus"></div>
+<button type="submit">Salvar alterações</button>
+</div>
+</form>
+<form class="cable-editor hidden" id="cableEditor">
+<div class="small-help">Use Add Cable, then click the origin point and destination point on the map.</div>
+<div class="field">
+<label for="cableId">Cable ID</label>
+<input id="cableId" placeholder="EX: CBL-001" required="" type="text">
+</div>
+<div class="field-row">
+<div class="field">
+<label for="cableFrom">From</label>
+<select id="cableFrom"></select>
+</div>
+<div class="field">
+<label for="cableTo">To</label>
+<select id="cableTo"></select>
+</div>
+</div>
+<div class="field-row">
+<div class="field">
+<label for="cableFromPort">From port</label>
+<input id="cableFromPort" placeholder="EX: SW1-05" type="text">
+</div>
+<div class="field">
+<label for="cableToPort">To port</label>
+<input id="cableToPort" placeholder="EX: ETH-1" type="text">
+</div>
+</div>
+<div class="field-row">
+<div class="field">
+<label for="cableType">Tipo de cabo</label>
+<select id="cableType">
+<option value="Ethernet">Ethernet</option>
+<option value="Fiber">Fiber</option>
+<option value="Power">Power</option>
+<option value="Control">Control</option>
+<option value="Coax">Coax</option>
+<option value="Other">Outro</option>
+</select>
+</div>
+<div class="field">
+<label for="cableStatus">Status</label>
+<select id="cableStatus">
+<option value="Active">Ativo</option>
+<option value="Spare">Spare</option>
+<option value="Damaged">Damaged</option>
+<option value="Removed">Removed</option>
+<option value="Planned">Planned</option>
+</select>
+</div>
+</div>
+<div class="field-row">
+<div class="field">
+<label for="cableColor">Line color</label>
+<input id="cableColor" type="color" value="#2563eb">
+</div>
+<div class="field">
+<label for="cableWidth">Line size</label>
+<select id="cableWidth">
+<option value="0.5">Ultra fine</option>
+<option value="1">Hairline</option>
+<option value="2">Thin</option>
+<option value="4">Medium</option>
+<option value="7">Thick</option>
+<option value="10">Very thick</option>
+</select>
+</div>
+</div>
+<div class="field-row">
+<div class="field">
+<label for="cableVlan">VLAN</label>
+<input id="cableVlan" placeholder="EX: 120" type="text">
+</div>
+<div class="field">
+<label for="cableRack">Rack / switch</label>
+<input id="cableRack" placeholder="EX: Rack-01 / SW-01" type="text">
+</div>
+</div>
+<div class="field">
+<label for="cableNotes">Notes</label>
+<textarea id="cableNotes" placeholder="Cable path, tray, patch panel, test notes..."></textarea>
+</div>
+<div class="editor-actions">
+<button type="submit">Save Cable</button>
+<button class="danger" id="deleteCable" type="button">Delete Cable</button>
+</div>
+</form>
+<details class="inspector-secondary"><summary>Explorar e analisar <span aria-hidden="true">⌄</span></summary><div class="report-actions">
+<button class="secondary" id="toggleQaReport" type="button">Qualidade dos dados</button>
+<button aria-expanded="false" class="secondary" id="toggleAuditLog" type="button">Histórico de alterações</button>
+</div>
+<section aria-live="polite" class="qa-panel hidden" id="qaReport"></section>
+<section class="qa-panel hidden" id="auditLogPanel"></section>
+<div class="tabs">
+<button class="active" id="showProcesses" type="button">Operações</button>
+<button class="" id="showPoints" type="button">Equipamentos</button>
+<button id="showCables" type="button">Cabos</button>
+</div>
+<div class="list">
+<div class="hidden" id="equipmentList"></div>
+<div class="hidden" id="cableList"></div>
+<div class="" id="processList"></div>
+</div></details>
+</aside>
+</div>
+<footer aria-live="polite" class="map-ui-statusbar" role="status">
+<span class="map-ui-status-message"><span aria-hidden="true" class="map-ui-status-icon">●</span><span>Pronto</span></span>
+<span aria-hidden="true" class="map-ui-status-spacer"></span>
+<span>PRIVADO</span>
+<span>Mapa interativo</span>
+</footer>
+<datalist id="manufacturingAreaOptions">
+<option value="Fundição"></option>
+<option value="Usinagem"></option>
+<option value="Montagem de motores"></option>
+<option value="Testes e dinamômetro"></option>
+<option value="Qualidade e metrologia"></option>
+<option value="Manutenção"></option>
+<option value="Logística industrial"></option>
+<option value="Utilidades industriais"></option>
+<option value="Tratamento e acabamento"></option>
+</datalist>
+<dialog class="" id="pointDialog" aria-labelledby="pointDialogHeading"><form class="modal" id="pointForm" method="dialog"><h2 id="pointDialogHeading">Criar operação</h2><div class="point-dialog-fields"><div id="pointOperationFields"><div class="field">
+<label for="newPointProcess">Operação</label>
+<input id="newPointProcess" list="processOptions" placeholder="Digite o nome da nova operação" required="" type="text"><p id="newPointOperationStatus" class="form-status hidden" role="alert"></p>
+<datalist id="processOptions"></datalist>
+</div></div><div id="pointOperationClassification"><div class="field deployment-field"><label for="newPointDeploymentStage">Classificação</label><select id="newPointDeploymentStage"><option value="TO DO">TO DO · Novo / planejado</option><option value="AS IS">AS IS · Já instalado</option></select></div></div><div class="field">
+<label for="newPointWorkstream">Frente de trabalho</label>
+<select id="newPointWorkstream">
+<option value="">Selecione a frente de trabalho</option>
+<option value="Plant Maintenance">Plant Maintenance</option>
+<option value="Supply Chain">Supply Chain</option>
+<option value="Design to Operate">Design to Operate</option>
+<option value="Quality">Quality</option>
+</select>
+</div><div class="field">
+<label for="newPointOperationArea">Área da operação</label>
+<input id="newPointOperationArea" list="manufacturingAreaOptions" maxlength="120" placeholder="Selecione ou digite uma área industrial" type="text">
+</div><section class="modal-section device-create-section hidden"><p class="small-help">Cadastre o equipamento agora. Vincular operações é opcional.</p><div class="field-row"><div class="field">
+<label for="newPointId">Código</label>
+<input id="newPointId" placeholder="EX: PR-01" type="text" disabled>
+</div><div class="field">
+<label for="newPointName">Nome do equipamento</label>
+<input id="newPointName" placeholder="Ex.: Equipamento da expedição" type="text" disabled>
+</div></div><div class="field-row"><div class="field">
+<label for="newPointType">Categoria</label>
+<select id="newPointType" disabled>
+<option value="Printer">Impressora</option>
+<option value="Reader">Leitor</option>
+<option value="Desktop">Desktop</option>
+<option value="Laptop">Notebook</option>
+<option value="Mobile Tablet">Tablet</option>
+<option value="EloTouch">EloTouch</option>
+<option value="Collector">Coletor</option>
+<option value="LTS">LTS</option>
+<option value="Other">Outro</option>
+</select>
+</div><div class="field">
+<label for="newPointStatus">Status</label>
+<select id="newPointStatus" disabled>
+<option value="Online">Online</option>
+<option value="Offline">Offline</option>
+</select>
+</div></div><div id="pointEquipmentOperation"></div></section><details class="device-create-section point-creation-more hidden" id="equipmentCreationMore"><summary>Mais informações</summary><div id="pointAdvancedClassification"></div><section class="point-create-subsection"><h3>Localização e prioridade</h3><div class="field-row"><div class="field">
+<label for="newPointCountry">País</label>
+<select id="newPointCountry" disabled><option value="Não informado">Não informado</option></select>
+</div><div class="field">
+<label for="newPointPlant">Planta</label>
+<input id="newPointPlant" placeholder="EX: Unidade 1" type="text" disabled>
+</div></div><div class="field-row"><div class="field">
+<label for="newPointCriticality">Criticidade</label>
+<select id="newPointCriticality" disabled>
+<option value="Low">Baixa</option>
+<option value="Medium">Média</option>
+<option value="High">Alta</option>
+<option value="Critical">Crítica</option>
+</select>
+</div><div class="field">
+<label for="newPointArea">Área</label>
+<input id="newPointArea" placeholder="Ex.: Planta 1 / Linha A" type="text" disabled>
+</div></div><div class="field-row"><div class="field">
+<label for="newPointLine">Linha de produção</label>
+<input id="newPointLine" placeholder="Ex.: Linha A" type="text" disabled>
+</div><div class="field">
+<label for="newPointStation">Estação</label>
+<input id="newPointStation" placeholder="Ex.: Estação de embalagem 03" type="text" disabled>
+</div></div></section><section class="point-create-subsection"><h3>Rede</h3><label class="checkbox-field wizard-toggle">
+<input id="newPointHasNetwork" type="checkbox" disabled>
+        Possui conexão de rede ou internet
+      </label><div class="wizard-section hidden" id="newPointNetworkFields"><div class="field-row"><div class="field">
+<label for="newPointIp">Endereço IP</label>
+<input id="newPointIp" placeholder="EX: 192.0.2.20" type="text" disabled>
+</div><div class="field">
+<label for="newPointPort">Porta de rede</label>
+<input id="newPointPort" placeholder="EX: SW1-05" type="text" disabled>
+</div></div><div class="field">
+<label for="newPointLtsTarget">Conectar a um LTS agora</label>
+<select id="newPointLtsTarget" disabled></select>
+</div></div></section><section class="point-create-subsection"><h3>Inventário e suporte</h3><div class="field-row"><div class="field">
+<label for="newPointModel">Modelo</label>
+<input id="newPointModel" placeholder="EX: Stratix 5700" type="text" disabled>
+</div><div class="field">
+<label for="newPointSerial">Número de série</label>
+<input id="newPointSerial" placeholder="EX: SN12345" type="text" disabled>
+</div></div><div class="field-row"><div class="field">
+<label for="newPointMac">MAC</label>
+<input id="newPointMac" placeholder="EX: 02:00:00:00:00:01" type="text" disabled>
+</div><div class="field">
+<label for="newPointVlan">VLAN</label>
+<input id="newPointVlan" placeholder="EX: VLAN 120" type="text" disabled>
+</div></div><div class="field-row"><div class="field">
+<label for="newPointHostname">Nome na rede</label>
+<input id="newPointHostname" placeholder="EX: DEV-01" type="text" disabled>
+</div><div class="field">
+<label for="newPointVendor">Fabricante</label>
+<input id="newPointVendor" placeholder="EX: Cisco / Rockwell" type="text" disabled>
+</div></div><div class="field-row"><div class="field">
+<label for="newPointOwner">Responsável / equipe</label>
+<input id="newPointOwner" placeholder="EX: Telecom L1" type="text" disabled>
+</div><div class="field">
+<label for="newPointTicket">Chamado</label>
+<input id="newPointTicket" placeholder="EX: INC123456" type="text" disabled>
+</div></div><div class="field-row"><div class="field">
+<label for="newPointRack">Rack / painel</label>
+<input id="newPointRack" placeholder="EX: Rack-01" type="text" disabled>
+</div><div class="field">
+<label for="newPointPortExtra">Porta física</label>
+<input id="newPointPortExtra" placeholder="EX: Patch-01" type="text" disabled>
+</div></div></section><section class="point-create-subsection"><h3>Marcador e observações</h3><div class="field-row"><div class="field">
+<label for="newPointColor">Cor do marcador</label>
+<input id="newPointColor" type="color" value="#ef4444" disabled>
+</div><div class="field">
+<label for="newPointShape">Formato do marcador</label>
+<select id="newPointShape" disabled>
+<option value="pin">Pino</option>
+<option value="circle">Círculo</option>
+<option value="square">Quadrado</option>
+<option value="diamond">Losango</option>
+</select>
+</div></div><div class="field">
+<label for="newPointInfo">Observações</label>
+<textarea id="newPointInfo" placeholder="Observações opcionais" disabled></textarea>
+</div></section></details></div><div class="modal-actions"><button class="secondary" id="cancelPoint" type="button">Cancelar</button><button type="submit">Criar operação</button></div></form></dialog>
+<dialog class="lightbox" id="photoDialog">
+<div class="modal">
+<img alt="Large equipment photo" id="largePhoto">
+<div class="modal-actions">
+<button class="secondary" id="closePhoto" type="button">Close</button>
+</div>
+</div>
+</dialog>
+<dialog aria-labelledby="linkedOperationsDialogTitle" class="linked-operations-dialog" id="linkedOperationsDialog">
+<div class="linked-operations-modal">
+<div class="linked-operations-modal-header">
+<div>
+<h2 id="linkedOperationsDialogTitle">Operações vinculadas</h2>
+<p class="small-help">Selecione as operações vinculadas a este device.</p>
+</div>
+<button class="secondary" id="closeLinkedOperations" type="button">Fechar</button>
+</div>
+<div id="linkedOperationsManagerHost"><div class="process-manager">
+<div class="process-add">
+<input id="processNameInput" placeholder="EX: Packing Line 01" type="text">
+<button class="secondary" id="addProcess" type="button">Adicionar</button>
+</div>
+<div class="chip-list" id="processChips"></div>
+</div></div>
+</div>
+</dialog>
+<dialog aria-labelledby="equipmentGroupTitle" class="equipment-group-dialog" id="equipmentGroupDialog"><div class="equipment-group-header"><h2 id="equipmentGroupTitle">Equipamentos neste ponto</h2><form method="dialog"><button aria-label="Fechar lista de equipamentos" type="submit">Fechar</button></form></div><p>Escolha o equipamento para abrir seu cadastro.</p><div class="equipment-group-list" id="equipmentGroupList"></div></dialog>
+<dialog class="operation-dialog" id="operationDialog" style="--operation-color: #0f766e;">
+<div class="operation-modal">
+<div class="operation-modal-header">
+<div>
+<span class="operation-dialog-id" id="operationDialogId">OP</span>
+<h2 id="operationDialogTitle">Detalhes da operação</h2>
+</div>
+<button class="secondary operation-modal-close" id="closeOperation" type="button">Fechar</button>
+</div>
+<div class="operation-dialog-summary" id="operationDialogSummary"></div>
+<div class="operation-dialog-content" id="operationDialogContent"></div>
+</div>
+</dialog>
+<dialog aria-labelledby="overviewHelpTitle" class="overview-help" id="overviewHelpDialog"><h2 id="overviewHelpTitle">Usar o painel</h2><p>Use Mapa, Equipamentos e Operações na navegação lateral. Escolha a planta no painel recolhível e clique no equipamento para abrir seu cadastro. Marcadores com números reúnem equipamentos próximos: escolha um na lista. Você também pode pesquisar por código, nome, IP ou série. Operações são filtros opcionais no painel lateral; Equipamentos abre a lista diretamente. A busca no cabeçalho encontra qualquer equipamento. Fechar o cadastro mantém sua busca, filtros e posição no mapa.</p><p>Use os botões de zoom ou Ctrl + rolagem para ampliar a planta. Depois de confirmar uma edição, aguarde o aviso de salvamento no servidor. Você e seu colega precisam acessar a mesma instalação para trabalhar nos mesmos dados. Use Backup privado para guardar uma cópia protegida dos dados e imagens.</p><form method="dialog"><button type="submit">Fechar</button></form></dialog></div>
+<script id="embeddedData" type="application/json">@@INVENTORY@@</script>
+<script id="applicationScript">@@APP_JS@@</script>
+</body></html>

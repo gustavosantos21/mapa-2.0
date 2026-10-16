@@ -1,0 +1,39 @@
+{
+  "activeMapId": "unidade_1",
+  "auditLogs": [],
+  "lastUpdated": "",
+  "maps": {
+    "unidade_1": {
+      "mapImage": "",
+      "points": [],
+      "cables": [],
+      "processes": [],
+      "processNodes": [],
+      "processLinks": []
+    },
+    "unidade_2": {
+      "mapImage": "",
+      "points": [],
+      "cables": [],
+      "processes": [],
+      "processNodes": [],
+      "processLinks": []
+    },
+    "unidade_3": {
+      "mapImage": "",
+      "points": [],
+      "cables": [],
+      "processes": [],
+      "processNodes": [],
+      "processLinks": []
+    },
+    "unidade_4": {
+      "mapImage": "",
+      "points": [],
+      "cables": [],
+      "processes": [],
+      "processNodes": [],
+      "processLinks": []
+    }
+  }
+}

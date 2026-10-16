@@ -1,0 +1,16 @@
+{
+  "name": "mapa-2-0",
+  "version": "2.7.0",
+  "private": true,
+  "type": "module",
+  "description": "Mapa privado de logística com autenticação, SQLite e colaboração.",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:demo": "node scripts/build.mjs --demo --out dist-demo",
+    "check": "node --check src/app.js && node --check src/search.js && node --check src/equipment-map.js && node --check scripts/build.mjs && node --check scripts/serve.mjs && node --check scripts/store.mjs && node --check scripts/admin.mjs && node --check scripts/configure.mjs && node --check scripts/migrate-portable.mjs",
+    "test": "node --test scripts/*.test.mjs",
+    "admin": "node scripts/admin.mjs",
+    "start": "node scripts/build.mjs && node scripts/serve.mjs"
+  }
+}

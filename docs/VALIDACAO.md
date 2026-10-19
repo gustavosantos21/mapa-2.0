@@ -1,5 +1,7 @@
 # Validação das versões 2 e 2.1
 
+Validação atual de entrada e conferência dos dois projetos: [Atualização de 19/10/2026](ATUALIZACAO_2026-10-19.md). Os registros abaixo preservam o histórico das versões anteriores.
+
 ## Atualização 2.1 — 9 de outubro de 2026
 
 A suíte final da versão 2.1 executou 41 testes: 40 passaram, nenhum falhou e um foi ignorado pela restrição do Windows para criar link simbólico de arquivo. Sintaxe, build e verificação do diff também passaram.

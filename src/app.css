@@ -4248,6 +4248,17 @@
 .horse-theme {min-height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--ink)}
 .horse-theme button,.private-login button {min-height:40px;border:1px solid #47524d;border-radius:5px;background:#202824;color:#f2f5f1;padding:8px 12px;font-weight:550;box-shadow:none}
 .horse-theme button:hover {background:#303b34;border-color:#87998b}
+/* Keep the operation pin's bottom center on its saved coordinate at every zoom. */
+.horse-theme .map-holder .process-marker {
+ width:24px;min-width:24px;height:26px;min-height:26px;
+ padding:0;border:0;border-radius:0;background:transparent;color:#fff;box-shadow:none;
+ scale:none;transform:translate(-50%,-100%) scale(var(--process-marker-scale,.82));
+ transform-origin:50% 100%;
+}
+.horse-theme .map-holder .process-marker:hover {
+ border:0;background:transparent;box-shadow:none;
+ transform:translate(-50%,-100%) scale(calc(var(--process-marker-scale,.82) * 1.08));
+}
 .horse-theme button.secondary {background:#202824;color:#e7ede8}
 .horse-theme button.danger {background:#402322;color:#ffb3ad;border-color:#78413b}
 .horse-theme input,.horse-theme select,.horse-theme textarea,.private-login input {min-height:40px;border:1px solid #55625b;border-radius:4px;background:#171e1a;color:#f5f7f3;padding:9px 11px;width:100%;box-shadow:none}
@@ -4646,7 +4657,7 @@ body.horse-body{overflow:hidden;margin:0;background:#14191a}
 .horse-theme .focus-map-actions{display:flex;align-items:center;gap:8px}
 .horse-theme .map-status{position:static;inset:auto;width:auto;padding:0;border:0;border-radius:0;gap:0;background:none;color:#fff;box-shadow:none;z-index:auto;font-size:12px;white-space:nowrap;min-height:0;max-width:none;overflow:visible;display:block}
 .horse-theme .map-status>span{padding:0;border:0;width:max-content;max-width:none;white-space:nowrap}
-.horse-theme .map-status>span:first-child{display:none}
+.horse-theme .map-status>span:first-child{display:inline}
 .horse-theme .equipment-list-tab{position:static;display:flex;align-items:center;gap:8px;width:auto;min-width:0;min-height:44px;height:44px;padding:10px 13px;writing-mode:initial;border:1px solid #455255;border-radius:8px;background:#1c2426;color:#fff;box-shadow:none;font-size:13px}
 .horse-theme .equipment-list-tab span{writing-mode:initial}
 .horse-theme .equipment-list-tab[aria-expanded=true]{border-color:#a392ff;background:#312b50}

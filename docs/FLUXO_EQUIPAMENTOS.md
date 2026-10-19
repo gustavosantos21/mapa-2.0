@@ -1,5 +1,7 @@
 # Mapa em foco e acesso direto — versão 2.6
 
+Atualização local de 19/10/2026: Mapa e Operações voltam a mostrar pinos individuais nas coordenadas das operações; a visão Equipamentos mantém os marcadores de dispositivos. Consulte [CORRECAO_OPERACOES.md](CORRECAO_OPERACOES.md). O restante deste documento registra o fluxo histórico da versão 2.6.
+
 Solicitação de 14/10/2026. Fluxo principal: localizar → selecionar equipamento → consultar → editar quando necessário.
 
 - Busca por código, nome, IP ou número de série abre o cartão de consulta diretamente, sem selecionar automaticamente sua operação. A aba Equipamentos também permite escolher pela lista.

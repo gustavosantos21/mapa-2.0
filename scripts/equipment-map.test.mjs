@@ -81,7 +81,9 @@ function navigationContext(allowDiscard) {
     document: { getElementById: () => ({ hidden: false, setAttribute() {} }) },
     closeContextMenus: () => calls.push(['closeMenus']),
     navigationSection: 'map', contextPanelOpen: false, contextUsesOverlay: () => false,
+    showEquipmentLayer: false, showOperationLayer: true,
     renderContextNavigation: () => calls.push(['navigation']),
+    renderMetrics() {}, renderLayerButtons() {}, renderOverviewOverview() {},
   });
   return { context, calls };
 }
@@ -436,7 +438,8 @@ test('cancelling equipment placement restores the earlier selection and list wit
   for (const closeDialog of [false, true]) {
     const { context, calls } = navigationContext(true);
     context.mapCreateMode = 'device'; context.selectedId = null; context.selectedCableId = null;
-    context.equipmentPlacementSelection = { point: 'earlier', cable: null, tab: 'points', drawerOpen: true };
+    context.equipmentPlacementSelection = { point: 'earlier', cable: null, tab: 'points', drawerOpen: true, equipmentLayer: false, operationLayer: true };
+    context.showEquipmentLayer = true; context.showOperationLayer = false;
     context.equipmentFormDirty = false;
     const controls = { focusEquipmentDrawer: { hidden: true }, openEquipmentList: { setAttribute(name, value) { this[name] = value; } }, createEquipmentPrimary: { focus: options => calls.push(['focusNew', options.preventScroll]) } };
     context.document = { getElementById: id => controls[id] };
@@ -449,6 +452,7 @@ test('cancelling equipment placement restores the earlier selection and list wit
     assert.equal(context.selectedId, 'earlier'); assert.equal(context.selectedCableId, null); assert.equal(context.activeTab, 'points');
     assert.equal(controls.focusEquipmentDrawer.hidden, false); assert.equal(controls.openEquipmentList['aria-expanded'], 'true');
     assert.equal(context.equipmentPlacementSelection, null); assert.equal(context.mapCreateMode, 'browse');
+    assert.equal(context.showEquipmentLayer, false); assert.equal(context.showOperationLayer, true, 'cancelling creation restores the previous operation overview');
     assert.deepEqual(preserved(context), before);
     assert.ok(calls.some(call => call[0] === 'focusNew' && call[1] === true));
   }

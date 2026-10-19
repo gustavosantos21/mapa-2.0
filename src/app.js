@@ -471,8 +471,8 @@
     let selectedDeploymentStage = "";
     let selectedDeviceType = "";
     let equipmentSearchResultsOpen = false;
-    let showEquipmentLayer = true;
-    let showOperationLayer = false;
+    let showEquipmentLayer = false;
+    let showOperationLayer = true;
     let showCableLayer = false;
     let showLabelLayer = true;
     const mapViewStorageKey = (mapId, value) => storageKeyForDocument("interactive-map-generic-v1-map-view:" + mapId + ":" + value);
@@ -1712,6 +1712,8 @@
       ["deploymentFilter", "deviceTypeFilter"].forEach(id => { const input = document.getElementById(id); if (input) input.value = ""; });
       equipmentPlacementSelection = null;
       contextPanelOpen = false;
+      showEquipmentLayer = true;
+      showOperationLayer = false;
       equipmentEditMode = true;
       setInspectorCollapsed(false);
       mapCreateMode = "browse";
@@ -1854,8 +1856,11 @@
     function renderMetrics() {
       kpiPoints.textContent = state.points.length;
       kpiCables.textContent = state.cables.length;
-      mapOperationCount.textContent = selectedProcessFilter ? (processNodeByName(selectedProcessFilter) ? 1 : 0) : operationSummariesWithEquipment().length;
+      const visibleOperationNames = new Set(operationSummariesWithEquipment().map(summary => summary.name));
+      mapOperationCount.textContent = (state.processNodes || []).filter(node => visibleOperationNames.has(node.name)).length;
       mapPointCount.textContent = filteredPoints().length;
+      mapOperationCount.parentElement.hidden = !showOperationLayer;
+      mapPointCount.parentElement.hidden = !showEquipmentLayer;
       mapCableCount.textContent = filteredCables().length;
       if (panelIsVisible(kpiIssues)) kpiIssues.textContent = buildDataQualityIssues().length;
     }
@@ -1894,7 +1899,7 @@
     }
 
     function renderOverviewOverview() {
-      document.getElementById("overviewMapContext").textContent = (DEFAULT_MAPS[state.activeMapId]?.label || "Planta") + " · " + (selectedProcessFilter ? "Operação: " + selectedProcessFilter : "Clique no equipamento ou pesquise para abrir seu cadastro");
+      document.getElementById("overviewMapContext").textContent = (DEFAULT_MAPS[state.activeMapId]?.label || "Planta") + " · " + (selectedProcessFilter ? "Operação: " + selectedProcessFilter : showEquipmentLayer ? "Equipamentos · Clique para consultar ou pesquise" : "Operações · Cada pino representa uma operação");
       if (!panelIsVisible(document.getElementById("overviewTotal"))) return;
       const inventory = allInventoryPoints();
       const pending = inventory.filter((point) => point.validationStatus === "Pending Validation" || point.status === "Pending Validation").length;
@@ -2111,7 +2116,7 @@
     function setMapCreateMode(mode) {
       if (!confirmDiscardPendingChanges()) return;
       if (mode === "device" && mapCreateMode !== "device") {
-        equipmentPlacementSelection = { navigation: navigationSection, panelOpen: contextPanelOpen, point: selectedId, cable: selectedCableId, tab: activeTab, drawerOpen: !document.getElementById("focusEquipmentDrawer").hidden };
+        equipmentPlacementSelection = { navigation: navigationSection, panelOpen: contextPanelOpen, equipmentLayer: showEquipmentLayer, operationLayer: showOperationLayer, point: selectedId, cable: selectedCableId, tab: activeTab, drawerOpen: !document.getElementById("focusEquipmentDrawer").hidden };
       } else if (mode !== "device") equipmentPlacementSelection = null;
       closeContextMenus();
       contextPanelOpen = false;
@@ -2120,7 +2125,8 @@
       document.getElementById("openEquipmentList").setAttribute("aria-expanded", "false");
       mapCreateMode = mode === "device" ? "device" : "process";
       setInspectorCollapsed(mapCreateMode === "device");
-      if (mapCreateMode === "process") showOperationLayer = true;
+      showOperationLayer = mapCreateMode === "process";
+      showEquipmentLayer = mapCreateMode === "device";
       cableMode = false;
       cableStartId = null;
       selectedId = null;
@@ -2138,6 +2144,8 @@
       if (equipmentPlacementSelection) {
         navigationSection = equipmentPlacementSelection.navigation || navigationSection;
         contextPanelOpen = equipmentPlacementSelection.panelOpen ?? contextPanelOpen;
+        showEquipmentLayer = equipmentPlacementSelection.equipmentLayer ?? showEquipmentLayer;
+        showOperationLayer = equipmentPlacementSelection.operationLayer ?? showOperationLayer;
         selectedId = equipmentPlacementSelection.point;
         selectedCableId = equipmentPlacementSelection.cable;
         activeTab = equipmentPlacementSelection.tab;
@@ -2417,12 +2425,14 @@
       if (!["map", "equipment", "operations"].includes(section) || !confirmDiscardPendingChanges()) return false;
       closeContextMenus();
       navigationSection = section;
+      showEquipmentLayer = section === "equipment";
+      showOperationLayer = section !== "equipment";
       contextPanelOpen = !!open;
       equipmentFormDirty = false; cableFormDirty = false; equipmentEditMode = false;
       setInspectorCollapsed(true);
       if (section === "equipment") activeTab = "points";
       renderContextNavigation();
-      renderTabs(); renderList(); renderEditor(); renderMap();
+      renderTabs(); renderList(); renderEditor(); renderMap(); renderMetrics(); renderLayerButtons(); renderOverviewOverview();
       if (!open) document.getElementById(section === "equipment" ? "openEquipmentList" : section === "operations" ? "navigateOperations" : "navigateMap").focus({ preventScroll: true });
       return true;
     }
@@ -3613,6 +3623,8 @@
       if (!confirmDiscardPendingChanges()) return false;
       closeContextMenus();
       equipmentSearchResultsOpen = false;
+      showEquipmentLayer = true;
+      showOperationLayer = false;
       selectedId = pointId;
       selectedCableId = null;
       activeTab = "points";
@@ -4711,6 +4723,7 @@
     document.getElementById("manageOperations").addEventListener("click", () => {
       if (!confirmDiscardPendingChanges()) return;
       showOperationLayer = true;
+      showEquipmentLayer = false;
       mapCreateMode = "browse";
       selectedId = null; selectedCableId = null; equipmentEditMode = false; equipmentFormDirty = false; cableFormDirty = false;
       setInspectorCollapsed(false);
@@ -4720,8 +4733,9 @@
     document.getElementById("toggleOperationLayer").addEventListener("click", () => {
       if (!confirmDiscardPendingChanges()) return;
       showOperationLayer = !showOperationLayer;
+      showEquipmentLayer = !showOperationLayer;
       mapCreateMode = "browse";
-      renderMap(); renderLayerButtons(); renderMapToolButtons();
+      renderMap(); renderLayerButtons(); renderMapToolButtons(); renderMetrics(); renderOverviewOverview();
     });
     document.getElementById("clearContextOperationFilter").addEventListener("click", () => {
       if (!confirmDiscardPendingChanges()) return;
@@ -4921,9 +4935,12 @@
     });
 
     toggleEquipmentLayer.addEventListener("click", () => {
+      if (!confirmDiscardPendingChanges()) return;
       showEquipmentLayer = !showEquipmentLayer;
+      showOperationLayer = !showEquipmentLayer;
       renderMap();
       renderLayerButtons();
+      renderMetrics(); renderOverviewOverview();
     });
 
     toggleCableLayer.addEventListener("click", () => {
@@ -5272,6 +5289,8 @@
       if (!equipmentUid && !cableUid) return false;
       if (!confirmDiscardPendingChanges()) return false;
       if (equipmentUid && pointById(equipmentUid)) {
+        showEquipmentLayer = true;
+        showOperationLayer = false;
         selectedId = equipmentUid;
         selectedCableId = null;
         activeTab = "points";
@@ -5290,6 +5309,7 @@
       saveActiveMap();
       state.activeMapId = targetMap[0];
       normalizeState();
+      if (equipmentUid) { showEquipmentLayer = true; showOperationLayer = false; }
       selectedId = equipmentUid || null;
       selectedCableId = cableUid || null;
       activeTab = equipmentUid ? "points" : "cables";

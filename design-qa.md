@@ -1,5 +1,7 @@
 # Design QA — Navegação lateral 2.7
 
+Validação complementar local de 19/10/2026: [correção da exibição e ancoragem de operações](docs/CORRECAO_OPERACOES.md). Foram conferidas as camadas de operações/equipamentos e a âncora em 100% e 150% de zoom. O relatório abaixo preserva a comparação visual da navegação lateral.
+
 15/10/2026. Implementação local baseada na imagem enviada pelo proprietário; sem commit ou envio ao GitHub.
 
 ## Referência e comparação

@@ -22,7 +22,7 @@ test('closed panels skip expensive report and inventory builders; ancestor visib
   const target = element({ parentElement: details });
   const context = vm.createContext({ qaReport: target, auditLogPanel: target, inventoryDashboard: target,
     document: { getElementById: () => target }, DEFAULT_MAPS: { demo: { label: 'Demo' } },
-    state: { activeMapId: 'demo' }, selectedProcessFilter: '',
+    state: { activeMapId: 'demo' }, selectedProcessFilter: '', showEquipmentLayer: false,
     allInventoryPoints: () => { throw new Error('Hidden inventory must not be aggregated'); },
     buildDataQualityIssues: () => { throw new Error('Hidden issues must not be calculated'); },
   });

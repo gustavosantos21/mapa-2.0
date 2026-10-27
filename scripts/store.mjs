@@ -114,6 +114,15 @@ export function validateState(value) {
   visit(value);
 }
 
+// The browser cannot be trusted to name the author: entries already stored keep
+// their original content, and new entries are attributed to the signed-in account.
+export function attributeAuditLogs(incoming, previous, author) {
+  if (incoming === undefined) return undefined;
+  const key = entry => typeof entry.id === 'string' && entry.id ? 'id:' + entry.id : 'json:' + JSON.stringify(entry);
+  const stored = new Map((Array.isArray(previous) ? previous : []).filter(entry => entry && typeof entry === 'object').map(entry => [key(entry), entry]));
+  return incoming.map(entry => stored.get(key(entry)) ?? { ...entry, user: author });
+}
+
 export function createStore({ storageDirectory, defaults, username, password }) {
   fs.mkdirSync(storageDirectory, { recursive: true, mode: 0o700 });
   if (fs.lstatSync(storageDirectory).isSymbolicLink()) throw new Error('Pasta privada não pode ser um link.');
@@ -195,6 +204,9 @@ export function createStore({ storageDirectory, defaults, username, password }) 
       validateState(value);
       db.exec('BEGIN IMMEDIATE');
       try {
+        const current = db.prepare('SELECT revision,payload FROM state WHERE id=1').get();
+        if (current.revision !== revision) { db.exec('ROLLBACK'); return null; }
+        value = { ...value, inventory: { ...value.inventory, auditLogs: attributeAuditLogs(value.inventory.auditLogs, JSON.parse(current.payload).inventory?.auditLogs, author) } };
         const result = db.prepare('UPDATE state SET revision=revision+1,payload=? WHERE id=1 AND revision=?').run(JSON.stringify(value), revision);
         if (!result.changes) { db.exec('ROLLBACK'); return null; }
         db.prepare('INSERT INTO events(timestamp,username,revision) VALUES(?,?,?)').run(new Date().toISOString(), author, revision + 1);

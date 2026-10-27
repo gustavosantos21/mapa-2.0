@@ -123,6 +123,8 @@ test('equipment edits persist to SQLite across server restart and do not leak in
   const newHeaders = await login(app);
   const restored = await state(app, newHeaders);
   assert.equal(restored.revision, savedData.revision);
+  // The server attributes new history entries to the authenticated account.
+  snapshot.inventory.auditLogs.at(-1).user = credentials.username;
   assert.deepEqual(restored.inventory, snapshot.inventory);
   assert.equal((await readFile(path.join(fixtureData.root, 'dist/index.html'), 'utf8')).includes('SYNTHETIC-PERSIST-1'), false);
 });

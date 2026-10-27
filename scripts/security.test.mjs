@@ -187,6 +187,21 @@ test('login guessing is bounded and unknown usernames do not disclose account ex
   assert.equal(limited, true, 'Login attempts must be rate limited');
 });
 
+test('audit entries are attributed by the server and stored entries cannot be rewritten', async t => {
+  const f = await fixture(t), auth = await f.login();
+  const headers = { origin: f.origin, cookie: auth.cookie, 'x-csrf-token': auth.csrf };
+  const save = async auditLogs => {
+    const current = (await f.request('/api/state', { headers: { cookie: auth.cookie } })).json;
+    const res = await f.request('/api/state', { method: 'PUT', body: { inventory: { ...current.inventory, auditLogs }, maps: current.maps, revision: current.revision }, headers });
+    assert.equal(res.status, 200, res.text);
+    return (await f.request('/api/state', { headers: { cookie: auth.cookie } })).json.inventory.auditLogs;
+  };
+  const entry = { id: 'synthetic-log-1', timestamp: '2026-01-01T00:00:00.000Z', entity: 'equipment', action: 'update', user: 'spoofed-colleague' };
+  assert.deepEqual((await save([entry])).map(log => log.user), [username]);
+  const rewritten = await save([{ ...entry, user: 'spoofed-colleague' }, { ...entry, id: 'synthetic-log-2' }]);
+  assert.deepEqual(rewritten.map(log => log.user), [username, username]);
+});
+
 test('a locked account does not block other accounts behind the same proxy address', async t => {
   const f = await fixture(t);
   const attempt = (name, secret) => f.request('/api/login', { method: 'POST', body: { username: name, password: secret }, headers: { origin: f.origin } });

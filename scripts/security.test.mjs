@@ -187,6 +187,14 @@ test('login guessing is bounded and unknown usernames do not disclose account ex
   assert.equal(limited, true, 'Login attempts must be rate limited');
 });
 
+test('a locked account does not block other accounts behind the same proxy address', async t => {
+  const f = await fixture(t);
+  const attempt = (name, secret) => f.request('/api/login', { method: 'POST', body: { username: name, password: secret }, headers: { origin: f.origin } });
+  for (let i = 0; i < 12; i++) await attempt('Synthetic-Locked-User', 'Synthetic-wrong-password');
+  assert.equal((await attempt('synthetic-locked-user', 'Synthetic-wrong-password')).status, 429, 'Account limit ignores username case');
+  assert.equal((await attempt(username, password)).status, 200, 'Other accounts on the same address can still sign in');
+});
+
 test('private asset directory symlink or junction is rejected before import/write', async t => {
   const directory = await mkdtemp(path.join(tmpdir(), 'map-security-link-'));
   t.after(() => rm(directory, { recursive: true, force: true }));

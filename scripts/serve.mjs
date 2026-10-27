@@ -6,6 +6,8 @@ import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { gzipSync, brotliCompressSync, constants as zlibConstants } from 'node:zlib';
 import { createStore, MAX_BODY } from './store.mjs';
 const PROJECT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const LOGIN_ACCOUNT_LIMIT = 10;
+const LOGIN_ADDRESS_LIMIT = 100;
 // Negotiate only the public HTML. Private API responses are never compressed.
 export function selectHtmlEncoding(header) {
   if (!header || !String(header).trim()) return 'identity';
@@ -67,12 +69,19 @@ export function createAppServer({root=path.join(PROJECT,'dist'),storageDirectory
         res.setHeader('Set-Cookie','map_session='+token+'; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800');
       }
       if(pathname==='/api/login' && req.method==='POST'){
-        const address=req.socket.remoteAddress || 'local';const now=Date.now();for(const [ip,v]of loginLimits)if(v.until<now)loginLimits.delete(ip);
-        const limit=loginLimits.get(address)||{count:0,until:now+15*60*1000};if(limit.count>=10){res.setHeader('Retry-After','900');return json(res,429,{error:'Muitas tentativas. Aguarde 15 minutos.'});}
+        // Behind the HTTPS proxy every client shares one socket address, so failures
+        // are limited per account; the per-address limit only stops broad guessing.
+        const address='ip:'+(req.socket.remoteAddress || 'local');const now=Date.now();for(const [key,v]of loginLimits)if(v.until<now)loginLimits.delete(key);
+        const limited=(key,max)=>(loginLimits.get(key)?.count||0)>=max;
+        const tooMany=()=>{res.setHeader('Retry-After','900');return json(res,429,{error:'Muitas tentativas. Aguarde 15 minutos.'});};
+        if(limited(address,LOGIN_ADDRESS_LIMIT))return tooMany();
         if(!String(req.headers['content-type']).startsWith('application/json'))return json(res,415,{error:'Use JSON.'});
         const credentials=JSON.parse((await body(req,4096)).toString('utf8'));
         if(typeof credentials.username!=='string'||typeof credentials.password!=='string'||credentials.username.length>100||credentials.password.length>256)return json(res,400,{error:'Credenciais inválidas.'});
-        limit.count++;loginLimits.set(address,limit);if(!store.verifyUser(credentials.username,credentials.password))return json(res,401,{error:'Usuário ou senha inválidos.'});loginLimits.delete(address);
+        const account='user:'+credentials.username.toLowerCase();if(limited(account,LOGIN_ACCOUNT_LIMIT))return tooMany();
+        for(const key of [address,account]){const limit=loginLimits.get(key)||{count:0,until:now+15*60*1000};limit.count++;loginLimits.set(key,limit);}
+        if(!store.verifyUser(credentials.username,credentials.password))return json(res,401,{error:'Usuário ou senha inválidos.'});
+        loginLimits.delete(account);const shared=loginLimits.get(address);if(shared)shared.count--;
         for(const [id,v]of sessions)if(v.expires<now)sessions.delete(id);if(sessions.size>=1000)return json(res,503,{error:'Limite de sessões atingido.'});if(cookie)sessions.delete(cookie);
         const token=randomBytes(32).toString('hex');session={username:credentials.username,csrfToken:randomBytes(32).toString('hex'),expires:now+8*60*60*1000};sessions.set(token,session);
         res.setHeader('Set-Cookie','map_session='+token+'; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800'+(origin?'; Secure':''));return json(res,200,{username:session.username,csrfToken:session.csrfToken});

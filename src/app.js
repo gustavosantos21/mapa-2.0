@@ -187,7 +187,8 @@
     const UI_LABELS = { Printer: "Impressora", Reader: "Leitor", Desktop: "Computador", Laptop: "Notebook", "Mobile Tablet": "Tablet", Collector: "Coletor", Other: "Outro", Equipment: "Equipamento",
       Low: "Baixa", Medium: "Média", High: "Alta", Critical: "Crítica", pin: "Marcador", circle: "Círculo", square: "Quadrado", diamond: "Losango", Unspecified: "Não informado",
       "Plant Maintenance": "Manutenção industrial", "Supply Chain": "Cadeia de suprimentos", "Design to Operate": "Projeto e operação", Quality: "Qualidade",
-      Discovered: "Identificado", "Pending Validation": "Validação pendente", Validated: "Validado", "Ready for Deployment": "Pronto para implantação", "In Deployment": "Em implantação", Active: "Ativo", Maintenance: "Manutenção", Replaced: "Substituído", Decommissioned: "Desativado" };
+      Discovered: "Identificado", "Pending Validation": "Validação pendente", Validated: "Validado", "Ready for Deployment": "Pronto para implantação", "In Deployment": "Em implantação", Active: "Ativo", Maintenance: "Manutenção", Replaced: "Substituído", Decommissioned: "Desativado",
+      Fiber: "Fibra óptica", Power: "Energia", Control: "Controle", Spare: "Reserva", Damaged: "Danificado", Removed: "Removido", Planned: "Planejado" };
     function uiLabel(value) { return Object.hasOwn(UI_LABELS, value) ? UI_LABELS[value] : String(value || ""); }
     const WORKSTREAMS = ["Plant Maintenance", "Supply Chain", "Design to Operate", "Quality"];
     const COUNTRIES = [...new Set(Object.values(DEFAULT_MAPS).map(map => map.country || "Não informado"))];
@@ -1544,7 +1545,7 @@
     }
 
     function unlinkProcesses(from, to) {
-      if (!confirm("Remover o vínculo entre as operações " + processDisplayId(from) + " and " + processDisplayId(to) + "? Os equipamentos continuarão vinculados às operações.")) return;
+      if (!confirm("Remover o vínculo entre as operações " + processDisplayId(from) + " e " + processDisplayId(to) + "? Os equipamentos continuarão vinculados às operações.")) return;
       const previousProcessLinks = [...(state.processLinks || [])];
       const previousAuditLogs = [...(state.auditLogs || [])];
       state.processLinks = (state.processLinks || []).filter((link) =>
@@ -2739,26 +2740,26 @@
       box.className = "process-card";
       const selectedPointId = selectedPoint()?.uid || "";
       box.innerHTML =
-        '<label>Create cable manually</label>' +
+        '<label>Criar cabo manualmente</label>' +
         '<div class="field-row">' +
-          '<div class="field"><label>From</label><select data-role="manual-from"></select></div>' +
-          '<div class="field"><label>To</label><select data-role="manual-to"></select></div>' +
+          '<div class="field"><label>Origem</label><select data-role="manual-from"></select></div>' +
+          '<div class="field"><label>Destino</label><select data-role="manual-to"></select></div>' +
         '</div>' +
         '<div class="process-add">' +
           '<select data-role="manual-lts"></select>' +
-          '<button class="secondary" type="button" data-action="use-lts">Use LTS as destination</button>' +
+          '<button class="secondary" type="button" data-action="use-lts">Usar LTS como destino</button>' +
         '</div>' +
         '<div class="field-row">' +
-          '<div class="field"><label>Cable type</label><select data-role="manual-type"><option value="Ethernet">Ethernet</option><option value="Fiber">Fiber</option><option value="Power">Power</option><option value="Control">Control</option><option value="Coax">Coax</option><option value="Other">Other</option></select></div>' +
+          '<div class="field"><label>Tipo de cabo</label><select data-role="manual-type"><option value="Ethernet">Ethernet</option><option value="Fiber">Fibra óptica</option><option value="Power">Energia</option><option value="Control">Controle</option><option value="Coax">Coax</option><option value="Other">Outro</option></select></div>' +
           '<div class="field"><label>Espessura do cabo</label><select data-role="manual-width"><option value="0.5">Ultrafino</option><option value="1">Muito fino</option><option value="2">Fino</option><option value="4">Médio</option><option value="7">Grosso</option><option value="10">Muito grosso</option></select></div>' +
         '</div>' +
         '<div class="field-row">' +
-          '<div class="field"><label>From port</label><input data-role="manual-from-port" type="text" placeholder="EX: SW1-05"></div>' +
-          '<div class="field"><label>To port</label><input data-role="manual-to-port" type="text" placeholder="EX: ETH-1"></div>' +
+          '<div class="field"><label>Porta de origem</label><input data-role="manual-from-port" type="text" placeholder="EX: SW1-05"></div>' +
+          '<div class="field"><label>Porta de destino</label><input data-role="manual-to-port" type="text" placeholder="EX: ETH-1"></div>' +
         '</div>' +
         '<div class="process-add">' +
-          '<input data-role="manual-cable-id" type="text" placeholder="Cable ID auto if empty">' +
-          '<button type="button" data-action="create-manual-cable">Create cable</button>' +
+          '<input data-role="manual-cable-id" type="text" placeholder="Código do cabo (automático se vazio)">' +
+          '<button type="button" data-action="create-manual-cable">Criar cabo</button>' +
         '</div>';
       const fromSelect = box.querySelector('[data-role="manual-from"]');
       const toSelect = box.querySelector('[data-role="manual-to"]');
@@ -2796,7 +2797,7 @@
       const targets = state.points.filter((candidate) => candidate.uid !== point.uid && candidate.type === "LTS");
       quickLtsTarget.innerHTML = targets.length
         ? targets.map((target) => '<option value="' + escapeHtml(target.uid) + '">' + escapeHtml(pointName(target)) + "</option>").join("")
-        : '<option value="">No LTS available</option>';
+        : '<option value="">Nenhum LTS disponível</option>';
       quickLtsTarget.disabled = !targets.length;
       quickLtsCable.disabled = !targets.length;
       quickCableId.value = "";
@@ -2864,10 +2865,10 @@
         card.querySelector(".card-dot").style.background = cable.color || "#2563eb";
         card.querySelector("span").textContent = pointName(from) + " -> " + pointName(to);
         card.querySelector(".card-meta").innerHTML =
-          "<span>" + escapeHtml(cable.type || "Cable") + "</span>" +
-          "<span>" + escapeHtml(cable.status || "Active") + "</span>" +
-          (cable.fromPort ? "<span>From " + escapeHtml(cable.fromPort) + "</span>" : "") +
-          (cable.toPort ? "<span>To " + escapeHtml(cable.toPort) + "</span>" : "");
+          "<span>" + escapeHtml(uiLabel(cable.type || "Cabo")) + "</span>" +
+          "<span>" + escapeHtml(uiLabel(cable.status || "Active")) + "</span>" +
+          (cable.fromPort ? "<span>Origem " + escapeHtml(cable.fromPort) + "</span>" : "") +
+          (cable.toPort ? "<span>Destino " + escapeHtml(cable.toPort) + "</span>" : "");
         card.addEventListener("click", () => {
           selectCable(cable.uid);
         });
@@ -3058,7 +3059,7 @@
           '</div>' +
           '<div class="process-add operation-process-add">' +
             '<input data-role="operation-process-input" type="text" placeholder="EX: Picking / Packing / Loading">' +
-            '<button class="secondary" type="button" data-action="add-operation-process">Add process</button>' +
+            '<button class="secondary" type="button" data-action="add-operation-process">Adicionar processo</button>' +
           '</div>' +
           '<div class="operation-processes"></div>' +
           '<div class="process-add process-device-add">' +
@@ -3069,11 +3070,11 @@
           '<div class="process-devices"></div>' +
           '<div class="process-add process-workstream-add">' +
             '<select data-role="workstream-select"></select>' +
-            '<button class="secondary" type="button" data-action="save-workstream">Save workstream</button>' +
+            '<button class="secondary" type="button" data-action="save-workstream">Salvar frente de trabalho</button>' +
           '</div>' +
           '<div class="process-add process-link-add">' +
             '<select data-role="process-link-select"></select>' +
-            '<button class="secondary" type="button" data-action="link-process">Link operations</button>' +
+            '<button class="secondary" type="button" data-action="link-process">Vincular operações</button>' +
           '</div>' +
           '<div class="process-links"></div>';
         card.querySelector("strong").textContent = processDisplayId(summary.node || summary.name) + " - " + summary.name;
@@ -3143,7 +3144,7 @@
           .filter((name) => name !== summary.name && !areProcessesLinked(summary.name, name));
         processLinkSelect.innerHTML = linkableProcesses.length
           ? linkableProcesses.map((name) => '<option value="' + escapeHtml(name) + '">' + escapeHtml(processDisplayId(name) + " - " + name) + '</option>').join("")
-          : '<option value="">No operation available</option>';
+          : '<option value="">Nenhuma operação disponível</option>';
         processLinkSelect.disabled = !linkableProcesses.length;
         card.querySelector('[data-action="link-process"]').disabled = !linkableProcesses.length;
         card.querySelector('[data-action="link-process"]').addEventListener("click", () => linkProcesses(summary.name, processLinkSelect.value));
@@ -3166,10 +3167,10 @@
         const operationProcessesBox = card.querySelector(".operation-processes");
         operationProcessesBox.classList.toggle("hidden", !isActiveProcess);
         if (!summary.operationProcesses.length) {
-          operationProcessesBox.innerHTML = '<p class="empty-state">No processes inside this operation yet.</p>';
+          operationProcessesBox.innerHTML = '<p class="empty-state">Nenhum processo cadastrado nesta operação.</p>';
         } else {
           operationProcessesBox.innerHTML = summary.operationProcesses.map((name) =>
-            '<div class="operation-process-row"><span>' + escapeHtml(name) + '</span><button class="secondary" type="button" data-operation-process="' + escapeHtml(name) + '">Remove</button></div>'
+            '<div class="operation-process-row"><span>' + escapeHtml(name) + '</span><button class="secondary" type="button" data-operation-process="' + escapeHtml(name) + '">Remover</button></div>'
           ).join("");
           operationProcessesBox.querySelectorAll("[data-operation-process]").forEach((button) => {
             button.addEventListener("click", () => removeProcessFromOperation(summary.name, button.dataset.operationProcess));
@@ -3179,7 +3180,7 @@
         const processLinksBox = card.querySelector(".process-links");
         processLinksBox.classList.toggle("hidden", !isActiveProcess || !summary.links.length);
         processLinksBox.innerHTML = summary.links.map((name) =>
-          '<div class="process-link-row"><span>Operation line to ' + escapeHtml(processDisplayId(name) + " - " + name) + '</span><button class="secondary" type="button" data-process-link="' + escapeHtml(name) + '">Remove link</button></div>'
+          '<div class="process-link-row"><span>Linha para a operação ' + escapeHtml(processDisplayId(name) + " - " + name) + '</span><button class="secondary" type="button" data-process-link="' + escapeHtml(name) + '">Remover vínculo</button></div>'
         ).join("");
         processLinksBox.querySelectorAll("[data-process-link]").forEach((button) => {
           button.addEventListener("click", () => unlinkProcesses(summary.name, button.dataset.processLink));

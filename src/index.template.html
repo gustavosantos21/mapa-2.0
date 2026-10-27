@@ -438,9 +438,9 @@ Planta atual</button><button hidden="" id="releaseMapMovement" title="Liberar ma
 <label for="quickCableType">Tipo de cabo</label>
 <select id="quickCableType">
 <option value="Ethernet">Ethernet</option>
-<option value="Fiber">Fiber</option>
-<option value="Power">Power</option>
-<option value="Control">Control</option>
+<option value="Fiber">Fibra óptica</option>
+<option value="Power">Energia</option>
+<option value="Control">Controle</option>
 <option value="Coax">Coax</option>
 <option value="Other">Outro</option>
 </select>
@@ -448,18 +448,18 @@ Planta atual</button><button hidden="" id="releaseMapMovement" title="Liberar ma
 <div class="field">
 <label for="quickCableWidth">Espessura do cabo</label>
 <select id="quickCableWidth">
-<option value="0.5">Ultra fine</option>
-<option value="1">Hairline</option>
-<option value="2">Thin</option>
-<option value="4">Medium</option>
-<option value="7">Thick</option>
-<option value="10">Very thick</option>
+<option value="0.5">Ultrafino</option>
+<option value="1">Muito fino</option>
+<option value="2">Fino</option>
+<option value="4">Médio</option>
+<option value="7">Grosso</option>
+<option value="10">Muito grosso</option>
 </select>
 </div>
 </div>
 <div class="field">
-<label for="quickCableId">Cable ID</label>
-<input id="quickCableId" placeholder="Auto if empty" type="text">
+<label for="quickCableId">Código do cabo</label>
+<input id="quickCableId" placeholder="Automático se vazio" type="text">
 </div>
 <div class="field">
 <label for="equipmentInfo">Informações</label>
@@ -531,28 +531,28 @@ Planta atual</button><button hidden="" id="releaseMapMovement" title="Liberar ma
 </div>
 </form>
 <form class="cable-editor hidden" id="cableEditor">
-<div class="small-help">Use Add Cable, then click the origin point and destination point on the map.</div>
+<div class="small-help">Use Adicionar cabo e clique no equipamento de origem e depois no de destino, no mapa.</div>
 <div class="field">
-<label for="cableId">Cable ID</label>
+<label for="cableId">Código do cabo</label>
 <input id="cableId" placeholder="EX: CBL-001" required="" type="text">
 </div>
 <div class="field-row">
 <div class="field">
-<label for="cableFrom">From</label>
+<label for="cableFrom">Origem</label>
 <select id="cableFrom"></select>
 </div>
 <div class="field">
-<label for="cableTo">To</label>
+<label for="cableTo">Destino</label>
 <select id="cableTo"></select>
 </div>
 </div>
 <div class="field-row">
 <div class="field">
-<label for="cableFromPort">From port</label>
+<label for="cableFromPort">Porta de origem</label>
 <input id="cableFromPort" placeholder="EX: SW1-05" type="text">
 </div>
 <div class="field">
-<label for="cableToPort">To port</label>
+<label for="cableToPort">Porta de destino</label>
 <input id="cableToPort" placeholder="EX: ETH-1" type="text">
 </div>
 </div>
@@ -561,9 +561,9 @@ Planta atual</button><button hidden="" id="releaseMapMovement" title="Liberar ma
 <label for="cableType">Tipo de cabo</label>
 <select id="cableType">
 <option value="Ethernet">Ethernet</option>
-<option value="Fiber">Fiber</option>
-<option value="Power">Power</option>
-<option value="Control">Control</option>
+<option value="Fiber">Fibra óptica</option>
+<option value="Power">Energia</option>
+<option value="Control">Controle</option>
 <option value="Coax">Coax</option>
 <option value="Other">Outro</option>
 </select>
@@ -572,27 +572,27 @@ Planta atual</button><button hidden="" id="releaseMapMovement" title="Liberar ma
 <label for="cableStatus">Status</label>
 <select id="cableStatus">
 <option value="Active">Ativo</option>
-<option value="Spare">Spare</option>
-<option value="Damaged">Damaged</option>
-<option value="Removed">Removed</option>
-<option value="Planned">Planned</option>
+<option value="Spare">Reserva</option>
+<option value="Damaged">Danificado</option>
+<option value="Removed">Removido</option>
+<option value="Planned">Planejado</option>
 </select>
 </div>
 </div>
 <div class="field-row">
 <div class="field">
-<label for="cableColor">Line color</label>
+<label for="cableColor">Cor da linha</label>
 <input id="cableColor" type="color" value="#2563eb">
 </div>
 <div class="field">
-<label for="cableWidth">Line size</label>
+<label for="cableWidth">Espessura da linha</label>
 <select id="cableWidth">
-<option value="0.5">Ultra fine</option>
-<option value="1">Hairline</option>
-<option value="2">Thin</option>
-<option value="4">Medium</option>
-<option value="7">Thick</option>
-<option value="10">Very thick</option>
+<option value="0.5">Ultrafino</option>
+<option value="1">Muito fino</option>
+<option value="2">Fino</option>
+<option value="4">Médio</option>
+<option value="7">Grosso</option>
+<option value="10">Muito grosso</option>
 </select>
 </div>
 </div>
@@ -607,12 +607,12 @@ Planta atual</button><button hidden="" id="releaseMapMovement" title="Liberar ma
 </div>
 </div>
 <div class="field">
-<label for="cableNotes">Notes</label>
-<textarea id="cableNotes" placeholder="Cable path, tray, patch panel, test notes..."></textarea>
+<label for="cableNotes">Observações</label>
+<textarea id="cableNotes" placeholder="Trajeto, eletrocalha, patch panel, resultados de teste..."></textarea>
 </div>
 <div class="editor-actions">
-<button type="submit">Save Cable</button>
-<button class="danger" id="deleteCable" type="button">Delete Cable</button>
+<button type="submit">Salvar cabo</button>
+<button class="danger" id="deleteCable" type="button">Excluir cabo</button>
 </div>
 </form>
 <details class="inspector-secondary"><summary>Explorar e analisar <span aria-hidden="true">⌄</span></summary><div class="report-actions">
@@ -775,7 +775,7 @@ Planta atual</button><button hidden="" id="releaseMapMovement" title="Liberar ma
 <div class="modal">
 <img alt="Large equipment photo" id="largePhoto">
 <div class="modal-actions">
-<button class="secondary" id="closePhoto" type="button">Close</button>
+<button class="secondary" id="closePhoto" type="button">Fechar</button>
 </div>
 </div>
 </dialog>
